@@ -27,7 +27,7 @@ jobs:
             git pull origin main
             
             # 3. Deploy using Docker Compose
-            docker-compose up --build -d
+            docker compose up --build -d
             
             # 4. Cleanup old unused images to save VPS space
             docker image prune -f
