@@ -20,7 +20,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # 1. Navigate to the project directory
-            cd /home/${{ secrets.VPS_USER }}/cicd_jenkins_gaction || git clone https://github.com/${{ github.repository }}.git
+            cd /home/${{ secrets.HOST_USERS }}/cicd_jenkins_gaction || git clone https://github.com/${{ github.repository }}.git
             
             # 2. Enter folder and pull latest code
             cd cicd_jenkins_gaction
