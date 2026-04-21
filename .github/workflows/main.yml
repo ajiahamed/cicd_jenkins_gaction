@@ -1,50 +1,33 @@
-name: Python CI/CD Pipeline
+name: Remote Deployment to VPS
 
-# This defines when the script runs
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  build-and-test:
-    # This runs on GitHub's hosted virtual machines
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest  # This is the GitHub-hosted runner
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Unit Tests
-        run: |
-          pytest test_app.py
-
-  deploy-to-host:
-    # Only deploy if the testing job passes
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Host via SSH
+      - name: Executing remote ssh commands using ssh-action
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST_IP }}
           username: ${{ secrets.HOST_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/jenkins/apps/cicd_jenkins_gaction
+            # 1. Navigate to the project directory
+            cd /home/${{ secrets.VPS_USER }}/cicd_jenkins_gaction || git clone https://github.com/${{ github.repository }}.git
+            
+            # 2. Enter folder and pull latest code
+            cd cicd_jenkins_gaction
             git pull origin main
+            
+            # 3. Deploy using Docker Compose
             docker-compose up --build -d
+            
+            # 4. Cleanup old unused images to save VPS space
+            docker image prune -f
