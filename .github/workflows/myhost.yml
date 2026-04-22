@@ -8,7 +8,7 @@ on:
 jobs:
   run-simulation:
     # Target your specific runner here
-    runs-on: [self-hosted, runner-01]
+    runs-on: [self-hosted, devops01]
 
     steps:
       - name: 1. Checkout Repository
