@@ -1,0 +1,48 @@
+name: Single Runner Deployment Simulation
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  run-simulation:
+    # Target your specific runner here
+    runs-on: [self-hosted, runner-01]
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Create Directory and File
+        run: |
+          echo "Step: Initialize"
+          # Using absolute paths to avoid permission issues in relative directories
+          mkdir -p "${{ github.workspace }}/simulation_workspace"
+          echo "this is a simulation" > "${{ github.workspace }}/simulation_workspace/config.txt"
+          echo "Created ${{ github.workspace }}/simulation_workspace/config.txt"
+
+      - name: 3. Test File Content
+        run: |
+          echo "Step: Testing..."
+          if grep -q "this is a simulation" "${{ github.workspace }}/simulation_workspace/config.txt"; then
+            echo "Verification successful: Content matches."
+          else
+            echo "Verification failed: Content mismatch."
+            exit 1
+          fi
+
+      - name: 4. Simulate Deployment
+        run: |
+          echo "Step: Deploying..."
+          # Creating the deployment target using the absolute workspace path
+          mkdir -p "${{ github.workspace }}/deploy_target"
+          cp "${{ github.workspace }}/simulation_workspace/config.txt" "${{ github.workspace }}/deploy_target/verified_config.txt"
+          echo "Deployment of verified_config.txt completed."
+
+      - name: 5. Final Cleanup
+        if: always()
+        run: |
+          echo "Cleaning up workspace..."
+          # Cleanup only the temporary simulation workspace
+          rm -rf "${{ github.workspace }}/simulation_workspace"
