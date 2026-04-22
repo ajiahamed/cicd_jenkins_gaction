@@ -1,0 +1,19 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: [self-hosted, runner-01]  
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build the Docker image
+      run: | 
+        export TAG=$(date +%s)
+        docker compose build
+        docker compose up -d
